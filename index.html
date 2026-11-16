@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>조선왕조 왕과 업적 짝 맞추기 게임 | 초등 5학년 역사</title>
+  
+  <!-- 오픈소스 교육용 웹폰트: Pretendard -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  
+  <!-- 스타일시트 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 축하 꽃가루 캔버스 -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- 상단 헤더 -->
+  <header class="game-header">
+    <div class="title-container">
+      <span class="title-badge">초등 5학년 사회과 역사 탐구</span>
+    </div>
+    <h1 class="main-title">👑 조선왕조 왕과 업적 짝 맞추기</h1>
+    <p class="sub-title">조선시대 임금 카드와 그 왕의 핵심 업적 카드를 뒤집어 짝을 맞춰보세요!</p>
+
+    <!-- 모드 선택 컨테이너 (1. 시대별 연습 학습 + 2. 랜덤 실력 테스트 상·중·하) -->
+    <div class="mode-container">
+      <!-- 1. 시대별 연습 방식 (학습용) -->
+      <div class="mode-group">
+        <div class="mode-group-title">
+          <span>📘 1단계: 시대별 연습 학습</span>
+          <span class="mode-group-sub">시대 순서대로 공부하기</span>
+        </div>
+        <div class="mode-buttons-row">
+          <button class="mode-btn active" data-mode="early">
+            <span>🏰 조선 전기</span>
+            <span class="count-badge">1~9대 (9쌍)</span>
+          </button>
+          <button class="mode-btn" data-mode="middle">
+            <span>⚔️ 조선 중기</span>
+            <span class="count-badge">10~18대 (9쌍)</span>
+          </button>
+          <button class="mode-btn" data-mode="late">
+            <span>📜 조선 후기</span>
+            <span class="count-badge">19~27대 (9쌍)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 랜덤 난이도별 테스트 (종합 퀴즈) -->
+      <div class="mode-group">
+        <div class="mode-group-title">
+          <span>🎲 2단계: 랜덤 실력 테스트</span>
+          <span class="mode-group-sub">27대 왕 중 무작위 출제!</span>
+        </div>
+        <div class="mode-buttons-row">
+          <button class="mode-btn diff-easy-btn" data-mode="diff-easy">
+            <span>🟢 난이도 하 (초급)</span>
+            <span class="count-badge">랜덤 6쌍 (12장)</span>
+          </button>
+          <button class="mode-btn diff-normal-btn" data-mode="diff-normal">
+            <span>🟡 난이도 중 (중급)</span>
+            <span class="count-badge">랜덤 10쌍 (20장)</span>
+          </button>
+          <button class="mode-btn diff-hard-btn" data-mode="diff-hard">
+            <span>🔴 난이도 상 (도전)</span>
+            <span class="count-badge">랜덤 15쌍 (30장)</span>
+          </button>
+          <button class="mode-btn master-btn" data-mode="all" title="조선왕조 전체 27대 왕">
+            <span>👑 전체 마스터</span>
+            <span class="count-badge">27쌍 (54장)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 상단 점수 및 조작 바 -->
+  <section class="status-bar">
+    <div class="stats-group">
+      <div class="stat-item">
+        <span>⏱️ 시간:</span>
+        <span class="value" id="stat-time">00:00</span>
+      </div>
+      <div class="stat-item">
+        <span>🎯 시도:</span>
+        <span class="value" id="stat-moves">0</span>회
+      </div>
+      <div class="stat-item">
+        <span>🏆 맞춘 짝:</span>
+        <span class="value" id="stat-matched">0 / 6</span>
+      </div>
+    </div>
+
+    <div class="controls-group">
+      <button class="action-btn" id="hint-btn">💡 힌트 (3)</button>
+      <button class="action-btn" id="restart-btn">🔄 다시하기</button>
+      <button class="action-btn" id="sound-toggle-btn">🔊 소리 켬</button>
+      <button class="action-btn primary" id="view-summary-btn">📖 27대 왕 도감</button>
+    </div>
+  </section>
+
+  <!-- 매칭 성공 시 실시간 학습 피드백 배너 -->
+  <div class="learning-banner hidden" id="learning-banner">
+    <span class="banner-icon">🎉</span>
+    <div class="banner-text" id="banner-text">
+      <!-- 동적 생성 -->
+    </div>
+  </div>
+
+  <!-- 메인 게임 보드 영역 -->
+  <main class="board-container">
+    <div class="card-grid grid-cols-4" id="card-grid">
+      <!-- 자바스크립트로 카드가 동적 생성됩니다 -->
+    </div>
+  </main>
+
+  <!-- 하단 부가 학습 섹션: 조·종·군 설명 및 암기송 (PDF 1쪽 상단/하단 반영) -->
+  <footer class="learning-section">
+    <div class="section-header">
+      <h3 class="section-title">💡 알아두면 쏙쏙! 왕의 이름(묘호) 비밀</h3>
+    </div>
+
+    <div class="guide-cards-grid">
+      <div class="guide-box jo">
+        <h4>🔴 조 (祖)</h4>
+        <p>나라를 처음 세웠거나(태조), 큰 국난을 극복하고 나라를 다시 일으켜 세운 공이 큰 왕에게 붙여요.<br><em>(태조, 세조, 선조, 인조, 영조, 정조, 고종)</em></p>
+      </div>
+      <div class="guide-box jong">
+        <h4>🔵 종 (宗)</h4>
+        <p>왕위를 평화롭게 정통으로 이어받고 인자한 성품으로 나라를 평안하게 다스린 왕에게 붙여요.<br><em>(정종, 태종, 세종, 문종, 단종, 성종, 숙종 등)</em></p>
+      </div>
+      <div class="guide-box gun">
+        <h4>⚪ 군 (君)</h4>
+        <p>정치를 잘못하여 반정이나 신하들에 의해 왕의 자리에서 쫓겨난 임금에게 붙여요.<br><em>(연산군, 광해군)</em></p>
+      </div>
+    </div>
+
+    <div class="mnemonic-banner">
+      <span class="mnemonic-title">🎵 조선시대 27대 왕 순서 암기송 (PDF 수록)</span>
+      <div class="mnemonic-content" id="mnemonic-verse-container">
+        <!-- 자바스크립트로 렌더링 -->
+      </div>
+    </div>
+  </footer>
+
+  <!-- 승리/완료 축하 모달 -->
+  <div class="modal-overlay" id="win-modal">
+    <div class="modal-content">
+      <div class="win-icon">🎉👑🏆</div>
+      <h2 class="win-title">축하합니다! 미션 완료!</h2>
+      <p class="win-subtitle" id="win-praise">조선시대 역사를 멋지게 익혔어요!</p>
+
+      <div class="win-score-box">
+        <div class="score-col">
+          <span class="lbl">소요 시간</span>
+          <span class="val" id="win-time">01:15</span>
+        </div>
+        <div class="score-col">
+          <span class="lbl">뒤집은 횟수</span>
+          <span class="val" id="win-moves">14회</span>
+        </div>
+      </div>
+
+      <div class="modal-btn-group">
+        <button class="modal-btn primary" id="modal-restart-btn">한 번 더 도전하기</button>
+        <button class="modal-btn secondary" id="modal-summary-btn">27대 왕 전체 도감 보기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 조선왕조 27대 전체 요약 도감 모달 -->
+  <div class="modal-overlay" id="summary-modal">
+    <div class="modal-content table-modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h2 style="font-size: 1.4rem; font-weight: 900; color: #1a1a1a;">📖 조선왕조 27대 왕 & 업적 한눈에 보기</h2>
+        <button class="action-btn" id="close-summary-btn" style="font-size: 1.1rem; padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 12px;">
+        PDF 1쪽의 내용을 토대로 초등학교 5학년이 한눈에 복습할 수 있도록 정리한 도감입니다.
+      </p>
+
+      <div style="overflow-x: auto; max-height: 55vh; border: 1px solid #dee2e6; border-radius: 8px;">
+        <table class="kings-summary-table">
+          <thead>
+            <tr>
+              <th style="width: 12%;">대수</th>
+              <th style="width: 18%;">왕 이름</th>
+              <th style="width: 16%;">시기</th>
+              <th style="width: 24%;">핵심 업적</th>
+              <th style="width: 30%;">5학년 한 줄 설명</th>
+            </tr>
+          </thead>
+          <tbody id="summary-table-body">
+            <!-- 자바스크립트로 동적 생성 -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 18px; text-align: center;">
+        <button class="modal-btn primary" onclick="document.getElementById('summary-modal').classList.remove('active')">
+          게임으로 돌아가기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 스크립트 로드 -->
+  <script src="js/data.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
