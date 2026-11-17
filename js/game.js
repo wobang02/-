@@ -190,10 +190,16 @@ class JoseonCardGame {
       cardEl.dataset.kingId = cardData.kingId;
       cardEl.dataset.cardType = cardData.cardType;
 
+      // 왕 이름 끝 글자("조", "종", "군")를 기준으로 뱃지 텍스트와 스타일 100% 일치 보장
+      const nameLastChar = cardData.kingName ? cardData.kingName.slice(-1) : cardData.type;
+      const effectiveType = (nameLastChar === "조" || nameLastChar === "종" || nameLastChar === "군") 
+        ? nameLastChar 
+        : cardData.type;
+
       // 조/종/군 뱃지 클래스
       let typeClass = "type-jong";
-      if (cardData.type === "조") typeClass = "type-jo";
-      if (cardData.type === "군") typeClass = "type-gun";
+      if (effectiveType === "조") typeClass = "type-jo";
+      if (effectiveType === "군") typeClass = "type-gun";
 
       // 카드 앞면 내용 (왕 카드 vs 업적 카드)
       let frontContent = "";
@@ -206,7 +212,7 @@ class JoseonCardGame {
           <div class="card-icon">${cardData.icon}</div>
           <div class="card-main-text">
             ${cardData.kingName}
-            <span class="card-type-tag ${typeClass}">${cardData.type}</span>
+            <span class="card-type-tag ${typeClass}">${effectiveType}</span>
           </div>
           <div class="card-footer-tip">업적을 찾아보세요!</div>
         `;
@@ -420,9 +426,14 @@ class JoseonCardGame {
 
     KINGS_DATA.forEach(k => {
       const tr = document.createElement("tr");
+      const nameLastChar = k.name ? k.name.slice(-1) : k.type;
+      const effectiveType = (nameLastChar === "조" || nameLastChar === "종" || nameLastChar === "군") 
+        ? nameLastChar 
+        : k.type;
+
       let typeClass = "type-jong";
-      if (k.type === "조") typeClass = "type-jo";
-      if (k.type === "군") typeClass = "type-gun";
+      if (effectiveType === "조") typeClass = "type-jo";
+      if (effectiveType === "군") typeClass = "type-gun";
 
       let eraLabel = "조선 전기";
       if (k.era === "middle") eraLabel = "조선 중기";
@@ -432,7 +443,7 @@ class JoseonCardGame {
         <td style="text-align:center; font-weight:700;">제${k.order}대</td>
         <td style="text-align:center;">
           <strong>${k.name}</strong>
-          <span class="card-type-tag ${typeClass}">${k.type}</span>
+          <span class="card-type-tag ${typeClass}">${effectiveType}</span>
         </td>
         <td style="text-align:center; color:#555;">${eraLabel}</td>
         <td style="font-weight:700; color:#2b8a3e;">${k.keyword}</td>
